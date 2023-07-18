@@ -1,0 +1,29 @@
+name: tfsec
+
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  # This workflow contains a single job for running tfsec
+  tfsec:
+    name: tfsec
+    runs-on: ubuntu-latest
+    
+    steps:      
+      - name: Clone repo
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: tfsec action
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: ./terraform
+          additional_args: "--config-file ./terraform/tfsec.yml"

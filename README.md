@@ -140,6 +140,8 @@ The Lambda handler is written in Java, but it should work for other languages.
 ### tfsec
 [tfsec](https://github.com/aquasecurity/tfsec) is a security scanner for Terraform code.
 
+A [Github Action](https://github.com/aquasecurity/tfsec-action) is run to execute `tfsec` on push and pull requests to the _main_ branch.
+
 #### Usage
 Run the following command inside the `terraform` folder:
 ```BASH
