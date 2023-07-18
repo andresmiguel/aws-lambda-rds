@@ -20,7 +20,7 @@ These are the tools needed for this project
 
 ## Infrastructure
 
-The following shows the infrastructure
+The following diagram shows the infrastructure
 
 ![Infrastructure](diagrams/lambda-rds-infrastructure-diagram.jpg)
 
@@ -54,7 +54,7 @@ name because it must be globally unique).
 
 Once the S3 backend is created you may proceed to deploy what is inside the `environment` folder.
 This creates all the resources depicted in the previous infrastructure diagram plus the following:
-- EventBridge rules to stop and start the Bastion Host and the RDS instance at the end and start of the weekend respectively.
+- EventBridge rules to stop and start the Bastion Host and the RDS instance at the beginning and end of the weekend respectively.
 - S3 bucket for SAM
 - SSM Parameter Store parameters
 
@@ -66,11 +66,11 @@ Then you can run `terraform apply -var-file dev.tfvars` to deploy the infrastruc
 
 ### Set up the RDS database
 
-Once the infrastructure is deployed you should have an RDS instance created. Follow the next steps to set up the DB:
+Once the infrastructure is deployed you should have an RDS instance created identified by `lambda-rds-dev`. Follow the next steps to set up the DB:
 - Go to RDS in the AWS Console and set a master password (you can autogenerate one)
 - Connect to the RDS instance (take the endpoint from Terraform output `db_instance_endpoint`)
   - _You can use the `tools/scripts/rds-ssh-tunnel.sh` script to create an SSH tunnel (you need to set the `ec2_instance_id` and
-  `rds_endpoint` variables in the `rds-ssh-tunnel.properties`)_
+  `rds_endpoint` variables in the `rds-ssh-tunnel.properties` file)_
 - Create a database named `lambda_rds_test`
   ```SQL
     CREATE DATABASE lambda_rds_test;
@@ -135,7 +135,7 @@ _Replace `{LambdaRDSApi}` with the SAM's Cloudformation output of the same name_
 business logic inside a Lambda handler, instead you should create a separate module for that and can use a Lambda Layer to
 put it.
 
-The Lambda handler is written in Java, but it should work for other languages.
+The Lambda handler is written in Java, but it should work for Lambda handlers written in other languages.
 
 ### tfsec
 [tfsec](https://github.com/aquasecurity/tfsec) is a security scanner for Terraform code.
@@ -159,4 +159,4 @@ tfsec . --config-file ./tfsec.yml
 ### Future enhancements
 
 Right now every time a Lambda function instance is created a new connection to the DB is created. This is not optimal.
-The solution is to use an **_RDS Proxy_**.
+The solution is to use an **_RDS Proxy_**. (Coming soon :))
