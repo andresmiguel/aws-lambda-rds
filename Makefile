@@ -7,4 +7,7 @@ build: install-dependencies
 deploy:
 	sam deploy --config-file samconfig.toml
 
+delete:
+	sam delete --config-file samconfig.toml
+
 build-deploy: build deploy

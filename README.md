@@ -146,7 +146,15 @@ Run the following command inside the `terraform` folder:
 tfsec . --config-file ./tfsec.yml
 ```
 
+### Delete all
+
+- First delete the application
+  - run `make delete` in the root folder _(it may take a while because of the Lambda access to the VPC)_
+- After the application is deleted destroy the infrastructure 
+  - run `terraform destroy -var-file dev.tfvars` in the `terraform/environment` folder
+  - run `terraform destroy` in the `terraform/terraform-s3-backend` folder
+
 ### Future enhancements
 
-Right now every time a Lambda function is created a new connection to the DB is created. This is not optimal. The solution
-is to use an **_RDS Proxy_**.
+Right now every time a Lambda function instance is created a new connection to the DB is created. This is not optimal.
+The solution is to use an **_RDS Proxy_**.
