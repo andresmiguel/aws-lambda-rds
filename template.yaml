@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  lambda-rds
+
+  Sample SAM Template for lambda-rds
+
+
+Globals:
+  Function:
+    Timeout: 20
+    MemorySize: 512
+
+Parameters:
+  AllowOrigins:
+    Type: String
+    Default: '*'
+    Description: CORS AllowOrigins header
+  DbResourceId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+    Description: RDS DB Instance resource Id (It's not the same as the DB Identifier)
+    Default: /lambda-rds/db-resource-id
+  DbUser:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+    Description: RDS DB Instance user
+    Default: /lambda-rds/db-iam-user
+  DbName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+    Description: DB Name
+    Default: /lambda-rds/db-name
+  DbEndpoint:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+    Description: RDS DB Endpoint
+    Default: /lambda-rds/db-endpoint
+  SubnetIds:
+    Type: 'AWS::SSM::Parameter::Value<CommaDelimitedList>'
+    Description: Subnet Ids to deploy this Lambda into
+    Default: /lambda-rds/subnet-ids
+  SecurityGroups:
+    Type: 'AWS::SSM::Parameter::Value<CommaDelimitedList>'
+    Description: Security Groups to apply to the Lambdas ENI
+    Default: /lambda-rds/security-groups
+
+Resources:
+  LambdaRDSApiGateway:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      Name: 'LambdaRDSApi'
+      StageName: dev
+      CorsConfiguration:
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+        AllowHeaders:
+          - content-type
+          - apigw-requestid
+        AllowOrigins:
+          - !Ref AllowOrigins
+
+  LambdaRDSJava:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: get-java-handler
+      Handler: com.ambh.example.lambdards.GetBooksHandler::handleRequest
+      Runtime: java11
+      Architectures:
+        - arm64
+      Environment:
+        Variables:
+          JAVA_TOOL_OPTIONS: -XX:+TieredCompilation -XX:TieredStopAtLevel=1
+          DB_USER: !Ref DbUser
+          DB_NAME: !Ref DbName
+          DB_ENDPOINT: !Ref DbEndpoint
+      VpcConfig:
+        SecurityGroupIds: !Ref SecurityGroups
+        SubnetIds: !Ref SubnetIds
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - Statement:
+            - Effect: Allow
+              Action:
+                - 'rds-db:connect'
+              Resource:
+                - !Sub 'arn:aws:rds-db:${AWS::Region}:${AWS::AccountId}:dbuser:${DbResourceId}/${DbUser}'
+      Events:
+        GetJava:
+          Type: HttpApi
+          Properties:
+            Path: /java/book
+            Method: GET
+            ApiId:
+              Ref: LambdaRDSApiGateway
+
+Outputs:
+  LambdaRDSApi:
+    Description: "API Gateway endpoint URL for Dev stage for Lambda-RDS"
+    Value: !Sub "https://${LambdaRDSApiGateway}.execute-api.${AWS::Region}.amazonaws.com/dev/"

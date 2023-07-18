@@ -1,0 +1,8 @@
+min_required_version: v1.28.1
+minimum_severity: MEDIUM
+exclude:
+  - aws-s3-encryption-customer-key
+  - aws-dynamodb-enable-recovery
+  - aws-s3-enable-bucket-logging
+  - aws-sns-topic-encryption-use-cmk
+  - aws-ec2-require-vpc-flow-logs-for-all-vpcs
