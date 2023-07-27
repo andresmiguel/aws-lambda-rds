@@ -27,5 +27,10 @@ data "aws_ami" "amazon-linux-2023" {
     name   = "ena-support"
     values = [true]
   }
+
+  filter {
+    name   = "architecture"
+    values = ["arm64"]
+  }
 }
 
